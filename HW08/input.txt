@@ -1,0 +1,4 @@
+With Azure you can globally distribute an Active Directory environment that is direct connect enabled.
+No other cloud provider has the ability to extend the reach of your domain controller.
+If you have multiple locations or use apps or cloud apps like the Microsoft 365.
+Active Directory integration with Azure will be the central tool for managing and maintaining access.
