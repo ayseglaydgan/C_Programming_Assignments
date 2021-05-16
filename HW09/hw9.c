@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include <stdlib.h>
-#define MAX_CUSTOMER 50
+#define MAX_C 50
 
 //void print_current_seq
 //void create_updated_seq
@@ -22,17 +22,17 @@ typedef struct
     labels label;
 }Customer;
 
-void Add_Customer(Customer *customer,int size);
+void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
 void print_infos(Customer *customer);
-void print_current_seq(Customer customer[MAX_CUSTOMER][MAX_CUSTOMER], int *size, int seq_num);
-void process_customer(Customer *customer, int size);
-void order_seq(Customer *customer, int size, int last_label);
+void print_current_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
+void process_customer(Customer customer[MAX_C][MAX_C], int *size, int temp_seq);
+void order_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
 
 
 
 int main(void)
 {
-    int size[MAX_CUSTOMER] = {0};
+    int size[MAX_C] = {0};
     size[0] = 5;
     size[1] = 4;
     int seq_num = 1;
@@ -43,7 +43,7 @@ int main(void)
     //seq_num = 0
     //size[seq_num] = 5
 
-    Customer customers[MAX_CUSTOMER][MAX_CUSTOMER] = {
+    Customer customers[MAX_C][MAX_C] = {
                                        {{"Jack",26,1},
                                         {"Henry",36,2},
                                         {"Muhammed",22,3},
@@ -60,6 +60,7 @@ int main(void)
         int choice;
         printf("**********Banking System**********\n");
         printf("Current Sequence:");
+        order_seq(customers,size,seq_num);
         print_current_seq(customers,size,seq_num);
         printf("\n");
         printf("1-Add customer\n");
@@ -68,20 +69,27 @@ int main(void)
         scanf("%d",&choice);
         if (choice == 1)
         {
-            // Add_Customer(customers,cur_size);
-            // cur_size++;
+            Add_Customer(customers,size,seq_num);
         }
         
         else if (choice == 2)
         {
-            if(size == 0)
+            int temp_seq = -1;
+            for (int i = 0; i <= seq_num; i++)
+            {
+                if (size[i] != 0)
+                {
+                    temp_seq = i;
+                    break;
+                }
+            }
+            if(temp_seq == -1)
             {
                 printf("No customer\n");
             }
             else
             {
-                // process_customer(customers,cur_size);
-                // cur_size--;
+                process_customer(customers, size, temp_seq);
             }
         }
         else if (choice == 0)
@@ -96,15 +104,17 @@ int main(void)
 }
 
 
-void Add_Customer(Customer *customer, int size)
+void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int seq_num)
 {
+    int cur_size = size[seq_num];
+    size[seq_num]++;
     printf("\nPlease enter the name of the customer:");
-    scanf("%s",customer[size].name);
+    scanf("%s",customer[seq_num][cur_size].name);
     printf("\nPlease enter the age of the customer:");
-    scanf(" %d",&customer[size].age);
+    scanf(" %d",&customer[seq_num][cur_size].age);
     printf("\nPlease enter the label of the customer:");
-    scanf(" %u",&customer[size].label);
-    order_seq(customer,size,customer[size].label);
+    scanf(" %u",&customer[seq_num][cur_size].label);
+    //order_seq(customer,size,customer[size].label);
 }
 
 void print_infos(Customer *customer)
@@ -115,7 +125,7 @@ void print_infos(Customer *customer)
 }
 
 
-void print_current_seq(Customer customer[MAX_CUSTOMER][MAX_CUSTOMER], int *size, int seq_num)
+void print_current_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num)
 {
     for (int i = 0; i <= seq_num; i++)
     {
@@ -127,37 +137,34 @@ void print_current_seq(Customer customer[MAX_CUSTOMER][MAX_CUSTOMER], int *size,
     printf("\n");
 }
 
-void process_customer(Customer *customer, int size)
+void process_customer(Customer customer[MAX_C][MAX_C], int *size,int temp_seq)
 {
-    printf("%s\n",customer[0].name);
-    for (int i = 0; i < size; i++)
+    printf("%s\n",customer[temp_seq][0].name);
+    for (int i = 0; i < size[temp_seq]; i++)
     {
-        customer[i] = customer[i+1];
+        customer[temp_seq][i] = customer[temp_seq][i+1];
     }
+    size[temp_seq]--;
 }
-void order_seq(Customer *customer, int size, int last_label)
+
+
+void order_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num)
 {
     Customer temp;
-    int num_label = 0;
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = i+1; j < size; j++)
-        {
-            if (customer[i].label > customer[j].label)
-            {
-                temp = customer[i];
-                customer[i] = customer[j];
-                customer[j] = temp;
-            } 
-        }
-        if(last_label == customer[i].label)
-        {
-            num_label++;
-        }
-    }
-    if(last_label == 0 && num_label == 5)
-    {
-        
-    }
 
+    for ( int k = 0; k <= seq_num; k++)
+    {
+        for (int i = 0; i < size[k]; i++)
+        {
+            for (int j = i+1; j < size[k]; j++)
+            {
+                if (customer[k][i].label > customer[k][j].label)
+                {
+                    temp = customer[k][i];
+                    customer[k][i] = customer[k][j];
+                    customer[k][j] = temp;
+                } 
+            }
+        }
+    }
 }
