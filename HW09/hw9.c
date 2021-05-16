@@ -22,12 +22,12 @@ typedef struct
     labels label;
 }Customer;
 
-void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
+void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label);
 void print_infos(Customer *customer);
 void print_current_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
 void process_customer(Customer customer[MAX_C][MAX_C], int *size, int temp_seq);
 void order_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
-
+int find_seq(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label, int cur_label);
 
 
 int main(void)
@@ -36,6 +36,7 @@ int main(void)
     size[0] = 5;
     size[1] = 4;
     int seq_num = 1;
+    int max_labels[5] = {5,3,3,2,2};
     // size[2] =
     // {{1,2,3,4,5},{1,2,3,4}}
     //size[2] = {5};
@@ -69,7 +70,7 @@ int main(void)
         scanf("%d",&choice);
         if (choice == 1)
         {
-            Add_Customer(customers,size,seq_num);
+            Add_Customer(customers,size,&seq_num,max_labels);
         }
         
         else if (choice == 2)
@@ -104,17 +105,52 @@ int main(void)
 }
 
 
-void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int seq_num)
+void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label)
 {
-    int cur_size = size[seq_num];
-    size[seq_num]++;
+    //temp esas işi en son eklenen labella önceden olanları kıyaslamak için
+    Customer temp;
+    
     printf("\nPlease enter the name of the customer:");
-    scanf("%s",customer[seq_num][cur_size].name);
+    scanf("%s",temp.name);
     printf("\nPlease enter the age of the customer:");
-    scanf(" %d",&customer[seq_num][cur_size].age);
+    scanf(" %d",&temp.age);
     printf("\nPlease enter the label of the customer:");
-    scanf(" %u",&customer[seq_num][cur_size].label);
+    scanf(" %u",&temp.label);
+
+
+    int cur_seq = find_seq(customer, size, seq_num, max_label,temp.label);
+    int cur_size = size[cur_seq];
+
+    customer[cur_seq][cur_size] = temp;
+    size[cur_seq]++;
     //order_seq(customer,size,customer[size].label);
+}
+
+int find_seq(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label, int cur_label)
+{
+    int temp_seq = -1;
+    for (int i = 0; i <= *seq_num; i++)
+    {
+        int count = 0;
+        for (int j = 0; j < size[i]; j++)
+        {
+            if (customer[i][j].label == cur_label)
+            {
+                count++;
+            }
+        }
+        if (max_label[cur_label] != count)
+        {
+            temp_seq = i;
+            break;
+        }
+    }
+    if (temp_seq == -1)
+    {
+        *seq_num += 1;
+        temp_seq = *seq_num;
+    }
+    return temp_seq;
 }
 
 void print_infos(Customer *customer)
