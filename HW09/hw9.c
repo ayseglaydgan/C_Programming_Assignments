@@ -1,64 +1,42 @@
 #include<stdio.h>
-#include <stdlib.h>
+/* max 50 customer holds at the same time*/
 #define MAX_C 50
-
-//void print_current_seq
-//void create_updated_seq
-// process_customer
-
-typedef enum
-{
-    employee,
-    retired,
-    student,
-    unemployed,
-    other
-}labels;
-
+/*struct definition*/
 typedef struct 
 {
     char name[20];
     int age;
-    labels label;
+    int label;
 }Customer;
-
+/*Declaration of helper functions*/
+/*Adds new  customer*/
 void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label);
-void print_infos(Customer *customer);
-void print_current_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
-void process_customer(Customer customer[MAX_C][MAX_C], int *size, int temp_seq);
-void order_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
+/*Finds the appropriate sequence for new customer*/
 int find_seq(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label, int cur_label);
-
+/*prints the current sequence*/
+void print_current_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
+/*Remove function*/
+void process_customer(Customer customer[MAX_C][MAX_C], int *size, int temp_seq);
+/*Always order the current sequence smallest to bigger*/
+void order_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num);
 
 int main(void)
 {
+    /*Holds the size of every sequence*/
     int size[MAX_C] = {0};
-    size[0] = 5;
-    size[1] = 4;
-    int seq_num = 1;
-    int max_labels[5] = {5,3,3,2,2};
-    // size[2] =
-    // {{1,2,3,4,5},{1,2,3,4}}
-    //size[2] = {5};
-    //seq_num = 0 1
-    //seq_num = 0
-    //size[seq_num] = 5
+    /*Holds the number of sequence*/
+    int seq_num = 0;
+    /*Example: seq_num = 0, size[seq_num] = 5
+    That means size of the first sequence equals to 5*/
 
-    Customer customers[MAX_C][MAX_C] = {
-                                       {{"Jack",26,1},
-                                        {"Henry",36,2},
-                                        {"Muhammed",22,3},
-                                        {"Aysegul",21,4},
-                                        {"Huseyin",22,0}}
-                                        ,
-                                        {{"Jack",26,0},
-                                        {"Henry",36,3},
-                                        {"Muhammed",22,2},
-                                        {"Aysegul",21,4}
-                                        }};
-    while (1)
+    /*Holds the max number of place for each label for each sequence*/
+    int max_labels[5] = {5,3,3,2,2};
+
+    Customer customers[MAX_C][MAX_C];
+    while(1)
     {
-        int choice;
+        int choice,i;
+        int temp_seq;
         printf("**********Banking System**********\n");
         printf("Current Sequence:");
         order_seq(customers,size,seq_num);
@@ -75,15 +53,17 @@ int main(void)
         
         else if (choice == 2)
         {
-            int temp_seq = -1;
-            for (int i = 0; i <= seq_num; i++)
+            temp_seq = -1;
+            for (i = 0; i <= seq_num; i++)
             {
                 if (size[i] != 0)
                 {
+                    /*Always removes the customer from the beginnig of the sequence*/
                     temp_seq = i;
                     break;
                 }
             }
+            /*If the temp_seq still -1, it means no customer*/
             if(temp_seq == -1)
             {
                 printf("No customer\n");
@@ -96,56 +76,66 @@ int main(void)
         else if (choice == 0)
         {
             printf("Goodbye\n");
-            exit(1);
+            return 0;
         }
         else
             printf("INVALID\n");
-        
     }
 }
 
 
 void Add_Customer(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label)
 {
-    //temp esas işi en son eklenen labella önceden olanları kıyaslamak için
+    /*Define to compare the added label and the sequence*/
     Customer temp;
-    
+    int cur_seq;
+    int cur_size;
     printf("\nPlease enter the name of the customer:");
     scanf("%s",temp.name);
     printf("\nPlease enter the age of the customer:");
     scanf(" %d",&temp.age);
     printf("\nPlease enter the label of the customer:");
-    scanf(" %u",&temp.label);
+    scanf(" %d",&temp.label);
 
-
-    int cur_seq = find_seq(customer, size, seq_num, max_label,temp.label);
-    int cur_size = size[cur_seq];
-
+    if (temp.label != 0 && temp.label != 1 && temp.label != 2 && temp.label != 3 && temp.label != 4 )
+    {
+        printf("INVALID LABEL\n");
+        return;
+    }
+    /*Decide the sequence to be added*/
+    cur_seq = find_seq(customer, size, seq_num, max_label,temp.label);
+    cur_size = size[cur_seq];
+    /*assign the whole temp struct to customer*/
     customer[cur_seq][cur_size] = temp;
+    /*increase the size of sequence which the customer added*/
     size[cur_seq]++;
-    //order_seq(customer,size,customer[size].label);
 }
 
 int find_seq(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_label, int cur_label)
 {
     int temp_seq = -1;
-    for (int i = 0; i <= *seq_num; i++)
+    int i,j;
+    for (i = 0; i <= *seq_num; i++)
     {
         int count = 0;
-        for (int j = 0; j < size[i]; j++)
+        for (j = 0; j < size[i]; j++)
         {
+            /*if current label equals to any label in sequence, increase the counter*/
             if (customer[i][j].label == cur_label)
             {
                 count++;
             }
         }
+        /*increased the counter to check the number of label is max or not*/
         if (max_label[cur_label] != count)
         {
+            /*if it is not max, say to add function you can add this sequence*/
             temp_seq = i;
             break;
         }
     }
-    if (temp_seq == -1)
+    /*if temp_seq is still -1, create new sequence*/
+    if (temp_seq == -1) 
     {
         *seq_num += 1;
         temp_seq = *seq_num;
@@ -153,19 +143,12 @@ int find_seq(Customer customer[MAX_C][MAX_C], int *size, int *seq_num, int *max_
     return temp_seq;
 }
 
-void print_infos(Customer *customer)
-{
-    printf("Name: %s\n",customer->name);
-    printf("The age: %d\n",customer->age);
-    printf("The label: %u\n",customer->label);
-}
-
-
 void print_current_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num)
 {
-    for (int i = 0; i <= seq_num; i++)
+    int i,j;
+    for (i = 0; i <= seq_num; i++)
     {
-        for (int j = 0; j < size[i]; j++)
+        for (j = 0; j < size[i]; j++)
         {
             printf("%d-",customer[i][j].label);
         }
@@ -175,11 +158,14 @@ void print_current_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num)
 
 void process_customer(Customer customer[MAX_C][MAX_C], int *size,int temp_seq)
 {
-    printf("%s\n",customer[temp_seq][0].name);
-    for (int i = 0; i < size[temp_seq]; i++)
+    int i;
+    printf("Proceed customer is %s\n",customer[temp_seq][0].name);
+    for (i = 0; i < size[temp_seq]; i++)
     {
+        /*shift the sequence to left*/
         customer[temp_seq][i] = customer[temp_seq][i+1];
     }
+    /*Decrease the size of sequence after remove*/
     size[temp_seq]--;
 }
 
@@ -187,12 +173,14 @@ void process_customer(Customer customer[MAX_C][MAX_C], int *size,int temp_seq)
 void order_seq(Customer customer[MAX_C][MAX_C], int *size, int seq_num)
 {
     Customer temp;
-
-    for ( int k = 0; k <= seq_num; k++)
+    int i,j,k;
+    /*for each sequence*/
+    for (k = 0; k <= seq_num; k++)
     {
-        for (int i = 0; i < size[k]; i++)
+        /*linear search/sort algorithm*/
+        for (i = 0; i < size[k]; i++)
         {
-            for (int j = i+1; j < size[k]; j++)
+            for (j = i+1; j < size[k]; j++)
             {
                 if (customer[k][i].label > customer[k][j].label)
                 {
