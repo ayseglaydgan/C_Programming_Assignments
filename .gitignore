@@ -1,3 +1,5 @@
 *.out
 
 /HW09/examples.c
+
+/.vscode
